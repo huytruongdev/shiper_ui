@@ -93,9 +93,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
                   height: 100,
                   decoration: BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage(
-                        "https://tenor.com/vi/view/gagfrance-gif-3916816369359804729",
-                      ),
+                      image: AssetImage("assets/images/success.jpg"),
                       fit: BoxFit.cover,
                     ),
                   ),
