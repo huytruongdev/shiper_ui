@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shipper_ui/models/order_model.dart';
-import 'package:shipper_ui/provider/delivery_provider.dart';
+import 'package:shipper_ui/providers/delivery_provider.dart';
 import 'package:shipper_ui/utils/colors.dart';
 import 'package:shipper_ui/widgets/custom_button.dart';
 
@@ -51,7 +51,7 @@ class OrderOnTheWay extends StatelessWidget {
           ListTile(
             leading: Icon(_getDeliveryIcon(), color: _getDeliveryIconColor()),
             title: Text(
-              "Delivery - ${order.customerName}",
+              "Delivery - ${order.id}",
               style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
             subtitle: Text(order.deliveryAddress),

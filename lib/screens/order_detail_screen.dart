@@ -2,9 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shipper_ui/provider/delivery_provider.dart';
+import 'package:shipper_ui/providers/delivery_provider.dart';
 import 'package:shipper_ui/route.dart';
-import 'package:shipper_ui/screen/delivery_map_screen.dart';
+import 'package:shipper_ui/screens/delivery_map_screen.dart';
 import 'package:shipper_ui/utils/colors.dart';
 import 'package:shipper_ui/utils/utils.dart';
 import 'package:shipper_ui/widgets/custom_button.dart';

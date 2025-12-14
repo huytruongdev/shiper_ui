@@ -1,10 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shipper_ui/provider/current_location_provider.dart';
-import 'package:shipper_ui/provider/delivery_provider.dart';
+import 'package:shipper_ui/providers/current_location_provider.dart';
+import 'package:shipper_ui/providers/delivery_provider.dart';
 import 'package:shipper_ui/utils/utils.dart';
 import 'package:shipper_ui/widgets/order_card.dart';
 

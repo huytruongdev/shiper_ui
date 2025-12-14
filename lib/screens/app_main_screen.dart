@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shipper_ui/screen/driver_home_screen.dart';
+import 'package:shipper_ui/screens/driver_home_screen.dart';
+import 'package:shipper_ui/screens/driver_orders_screen.dart';
 import 'package:shipper_ui/utils/colors.dart';
 
 class AppMainScreen extends StatefulWidget {
@@ -13,7 +14,7 @@ class AppMainScreen extends StatefulWidget {
 class _AppMainScreenState extends State<AppMainScreen> {
   final List<Widget> pages = [
     DriverHomeScreen(),
-    Center(child: Text("Orders")),
+    const DriverOrdersScreen(),
     Center(child: Text("Shipment")),
     Center(child: Text("Profile")),
   ];

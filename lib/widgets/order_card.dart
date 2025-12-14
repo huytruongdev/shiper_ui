@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shipper_ui/route.dart';
-import 'package:shipper_ui/screen/order_detail_screen.dart';
+import 'package:shipper_ui/screens/order_detail_screen.dart';
 import 'package:shipper_ui/utils/colors.dart';
 import 'package:shipper_ui/utils/utils.dart';
 import 'package:shipper_ui/widgets/custom_button.dart';

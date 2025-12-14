@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:shipper_ui/provider/delivery_provider.dart';
-import 'package:shipper_ui/screen/app_main_screen.dart';
-import 'package:shipper_ui/utils/colors.dart';
+import 'package:shipper_ui/providers/delivery_provider.dart';
+import 'package:shipper_ui/screens/app_main_screen.dart';
 import 'package:shipper_ui/widgets/custom_button.dart';
 import 'package:shipper_ui/widgets/order_on_the_way.dart';
 
@@ -137,7 +136,10 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
     return GoogleMap(
       onMapCreated: (GoogleMapController controller) {
         _mapController = controller;
-        if (provider.currentOrder != null) {
+        // Nếu muốn camera focus vào xe shipper khi bắt đầu
+        if (provider.currentDeliveryBoyPosition != null) {
+             _moveToLocation(provider.currentDeliveryBoyPosition!);
+        } else if (provider.currentOrder != null) {
           _moveToLocation(provider.currentOrder!.pickupLocation);
         }
       },
@@ -145,7 +147,7 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
         target: LatLng(10.762622, 106.660172),
         zoom: 14.0,
       ),
-      markers: _buildMarkers(provider),
+      markers: _buildMarkers(provider), 
       polylines: _buildPolylines(provider),
       zoomControlsEnabled: false,
       myLocationButtonEnabled: false,
@@ -153,54 +155,11 @@ class _DeliveryMapScreenState extends State<DeliveryMapScreen> {
   }
 
   Set<Marker> _buildMarkers(DeliveryProvider provider) {
-    Set<Marker> markers = {};
-    markers.add(
-      Marker(
-        markerId: MarkerId("pickup"),
-        position: provider.currentOrder?.pickupLocation ?? LatLng(0.0, 0.0),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-        infoWindow: InfoWindow(title: "Pickup location"),
-      ),
-    );
-    markers.add(
-      Marker(
-        markerId: MarkerId("delivery"),
-        position: provider.currentOrder?.deliveryLocation ?? LatLng(0.0, 0.0),
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
-        infoWindow: InfoWindow(title: "Delivery location"),
-      ),
-    );
-    if (provider.currentDeliveryBoyPosition != null) {
-      markers.add(
-        Marker(
-          markerId: MarkerId("Delivery_boy"),
-          position: provider.currentDeliveryBoyPosition ?? LatLng(0.0, 0.0),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-            BitmapDescriptor.hueBlue,
-          ),
-          infoWindow: InfoWindow(title: "Delivery Boy"),
-        ),
-      );
-      _moveToLocation(provider.currentDeliveryBoyPosition!);
-    }
-    return markers;
+    return provider.markers;
   }
 
   Set<Polyline> _buildPolylines(DeliveryProvider provider) {
-    Set<Polyline> polylines = {};
-    if (provider.routePoints.isNotEmpty &&
-        provider.status != DeliveryStatus.waitingForAcceptance &&
-        provider.status != DeliveryStatus.rejected) {
-      polylines.add(
-        Polyline(
-          polylineId: PolylineId("route"),
-          points: provider.routePoints,
-          color: buttonMainColor,
-          width: 6,
-        ),
-      );
-    }
-    return polylines;
+    return provider.polylines;
   }
 
   void _moveToLocation(LatLng location) {

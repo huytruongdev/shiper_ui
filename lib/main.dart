@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shipper_ui/provider/current_location_provider.dart';
-import 'package:shipper_ui/provider/delivery_provider.dart';
-import 'package:shipper_ui/screen/app_main_screen.dart';
+import 'package:shipper_ui/providers/current_location_provider.dart';
+import 'package:shipper_ui/providers/delivery_provider.dart';
+import 'package:shipper_ui/screens/app_main_screen.dart';
 
 void main() {
   runApp(const MyApp());
