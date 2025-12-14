@@ -15,13 +15,12 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_)=>CurrentLocationProvider()),
-        ChangeNotifierProvider(create: (_)=>DeliveryProvider()),
-
+        ChangeNotifierProvider(create: (_) => CurrentLocationProvider()),
+        ChangeNotifierProvider(create: (_) => DeliveryProvider()),
       ],
       child: MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: const AppMainScreen(),
+        debugShowCheckedModeBanner: false,
+        home: const AppMainScreen(),
       ),
     );
   }

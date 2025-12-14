@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shipper_ui/screens/driver_home_screen.dart';
 import 'package:shipper_ui/screens/driver_orders_screen.dart';
 import 'package:shipper_ui/utils/colors.dart';
 
@@ -13,19 +12,17 @@ class AppMainScreen extends StatefulWidget {
 
 class _AppMainScreenState extends State<AppMainScreen> {
   final List<Widget> pages = [
-    DriverHomeScreen(),
+    Center(child: Text("Home")),
     const DriverOrdersScreen(),
-    Center(child: Text("Shipment")),
     Center(child: Text("Profile")),
   ];
   int _currentIndex = 0;
   final List<IconData> _icons = [
     FontAwesomeIcons.house,
     FontAwesomeIcons.boxOpen,
-    FontAwesomeIcons.truckFast,
     FontAwesomeIcons.solidCircleUser,
   ];
-  final List<String> _labels = ["House", "Orders", "Shipment", "Profile"];
+  final List<String> _labels = ["House", "Orders", "Profile"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(

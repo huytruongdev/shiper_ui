@@ -37,7 +37,9 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
     _setupMarkers();
     // _drawStaticRoute();
-    _startTracking();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _startTracking();
+    });
   }
 
   void _setupMarkers() {
@@ -69,7 +71,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 1, // Di chuyển 5m thì cập nhật
+      distanceFilter: 5, // Di chuyển 5m thì cập nhật
     );
 
     _positionStream = Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -108,7 +110,6 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
       return;
     }
 
-    // Gọi API
     bool success = await _orderService.updateOrderStatus(widget.order.id!, nextStatus);
 
     if (success) {
