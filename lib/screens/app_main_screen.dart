@@ -11,18 +11,26 @@ class AppMainScreen extends StatefulWidget {
 }
 
 class _AppMainScreenState extends State<AppMainScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   final List<Widget> pages = [
     Center(child: Text("Home")),
     const DriverOrdersScreen(),
     Center(child: Text("Profile")),
   ];
+
   int _currentIndex = 0;
   final List<IconData> _icons = [
     FontAwesomeIcons.house,
     FontAwesomeIcons.boxOpen,
     FontAwesomeIcons.solidCircleUser,
   ];
+
   final List<String> _labels = ["House", "Orders", "Profile"];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

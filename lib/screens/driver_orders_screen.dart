@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shipper_ui/providers/driver_orders_provider.dart'; // Import provider
-// Import widget card
+import 'package:provider/provider.dart'; // Vẫn cần import package này để dùng Consumer bên trong các Tab
+import 'package:shipper_ui/providers/driver_orders_provider.dart';
 import 'package:shipper_ui/utils/colors.dart';
 import 'package:shipper_ui/widgets/order_list_tab.dart';
 
-class DriverOrdersScreen extends StatelessWidget {
+class DriverOrdersScreen extends StatefulWidget {
   const DriverOrdersScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DriverOrdersProvider()..init(),
-      child: const _DriverOrdersView(),
-    );
-  }
+  State<DriverOrdersScreen> createState() => _DriverOrdersScreenState();
 }
 
-class _DriverOrdersView extends StatefulWidget {
-  const _DriverOrdersView();
-
-  @override
-  State<_DriverOrdersView> createState() => _DriverOrdersViewState();
-}
-
-class _DriverOrdersViewState extends State<_DriverOrdersView>
+class _DriverOrdersScreenState extends State<DriverOrdersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 

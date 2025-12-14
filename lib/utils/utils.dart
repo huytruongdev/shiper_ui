@@ -51,5 +51,3 @@ void showAppSnackbar({
       break;
   }
 }
-
-final String tenderCoconut = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrPp_GAMFpt5zSANazZPe0g-1-fRFsfI8ARA&s";

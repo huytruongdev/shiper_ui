@@ -11,7 +11,6 @@ class OrderItem {
     required this.price,
   });
 
-  // Convert sang JSON để gửi lên Server
   Map<String, dynamic> toJson() {
     return {
       "productId": productId,
@@ -20,8 +19,6 @@ class OrderItem {
       "price": price,
     };
   }
-
-  // Convert từ JSON Server trả về thanh Object
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     return OrderItem(
       productId: json["productId"] ?? "",
