@@ -36,13 +36,14 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
   late LatLng shopLocation;
   late LatLng userLocation;
+  
+  LatLng? _currentDriverPos; 
+  
   Set<Marker> _markers = {};
-  
   String currentStatus = "";
-  bool _isApiCalling = false;
-  
-  double? _currentDistance; 
+  bool _isApiCalling = false; 
 
+  // Cấu hình luồng trạng thái: accepted -> shipping -> arrived -> delivered
   final Map<String, StatusConfig> _statusConfigs = {
     'accepted': const StatusConfig(
       label: "Bắt đầu giao hàng",
@@ -107,13 +108,15 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
 
     const LocationSettings locationSettings = LocationSettings(
       accuracy: LocationAccuracy.high,
-      distanceFilter: 5, 
+      distanceFilter: 5, // Cập nhật mỗi 5 mét di chuyển
     );
 
     _positionStream = Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen((Position position) {
       
       LatLng driverPos = LatLng(position.latitude, position.longitude);
+      
+      _currentDriverPos = driverPos; 
       
       _animateCamera(driverPos, position.heading);
       
@@ -124,27 +127,16 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
         'heading': position.heading,
       });
 
-      // Tính toán và lưu lại khoảng cách hiện tại
-      double distance = Geolocator.distanceBetween(
-        driverPos.latitude, driverPos.longitude,
-        userLocation.latitude, userLocation.longitude,
-      );
-      
-      _currentDistance = distance;
-
-      // Check tự động đến nơi
-      _checkAutoArrival(distance);
+      if (currentStatus == 'shipping' && !_isApiCalling) {
+         double distToUser = Geolocator.distanceBetween(
+            driverPos.latitude, driverPos.longitude,
+            userLocation.latitude, userLocation.longitude,
+         );
+         if (distToUser < 100) {
+            _executeStatusChange(targetStatus: 'arrived');
+         }
+      }
     });
-  }
-
-  void _checkAutoArrival(double distance) async {
-    // Chỉ tự động khi đang đi giao
-    if (currentStatus != 'shipping') return;
-    if (_isApiCalling) return;
-
-    if (distance < 100) {
-      await _executeStatusChange(targetStatus: 'arrived');
-    }
   }
 
   Future<void> _animateCamera(LatLng pos, double heading) async {
@@ -152,6 +144,67 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
     controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(target: pos, zoom: 17, bearing: heading),
     ));
+  }
+
+  void _onStatusButtonPressed() {
+    // 1. Nếu chưa có GPS -> Chặn
+    if (_currentDriverPos == null) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Đang định vị... Vui lòng đợi!"), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    // 2. Kiểm tra khoảng cách dựa trên trạng thái hiện tại
+    
+    // TRƯỜNG HỢP A: Đang ở quán (accepted) -> Muốn đi giao (shipping)
+    // Yêu cầu: Phải ở gần quán (< 100m)
+    if (currentStatus == 'accepted') {
+      double distToShop = Geolocator.distanceBetween(
+        _currentDriverPos!.latitude, _currentDriverPos!.longitude,
+        shopLocation.latitude, shopLocation.longitude,
+      );
+
+      if (distToShop > 100) {
+        _showDistanceError("Bạn đang cách quán ${distToShop.toStringAsFixed(0)}m. Hãy đến quán lấy hàng trước!");
+        return; 
+      }
+    }
+
+    // TRƯỜNG HỢP B: Đang đi giao (shipping) -> Muốn báo tới nơi (arrived)
+    // HOẶC: Đã tới nơi (arrived) -> Muốn báo hoàn thành (delivered)
+    // Yêu cầu: Cả 2 trường hợp này đều phải ở gần nhà khách (< 100m)
+    else if (currentStatus == 'shipping' || currentStatus == 'arrived') {
+      double distToUser = Geolocator.distanceBetween(
+        _currentDriverPos!.latitude, _currentDriverPos!.longitude,
+        userLocation.latitude, userLocation.longitude,
+      );
+
+      if (distToUser > 100) {
+        String action = currentStatus == 'arrived' ? "hoàn thành đơn" : "xác nhận tới nơi";
+        _showDistanceError("Bạn còn cách khách ${distToUser.toStringAsFixed(0)}m. Hãy đến gần hơn để $action!");
+        return; 
+      }
+    }
+
+    _executeStatusChange();
+  }
+
+  void _showDistanceError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white),
+            const SizedBox(width: 10),
+            Expanded(child: Text(message)),
+          ],
+        ), 
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   Future<void> _executeStatusChange({String? targetStatus}) async {
@@ -177,9 +230,9 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
          );
       } else if (nextStatus == 'delivered') {
          ScaffoldMessenger.of(context).showSnackBar(
-           const SnackBar(content: Text("Đơn hàng hoàn tất!")),
+           const SnackBar(content: Text("Đơn hàng hoàn tất!"), backgroundColor: Colors.green),
          );
-         Navigator.pop(context);
+         Navigator.pop(context); // Thoát màn hình tracking
       }
 
     } else {
@@ -191,33 +244,6 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
     if (mounted) {
       setState(() => _isApiCalling = false);
     }
-  }
-
-  void _onStatusButtonPressed() {
-    if (currentStatus == 'shipping' || currentStatus == 'arrived') {
-      
-      // Nếu chưa lấy được vị trí GPS
-      if (_currentDistance == null) {
-         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Đang định vị... Vui lòng đợi!"), backgroundColor: Colors.orange),
-        );
-        return;
-      }
-
-      // Nếu khoảng cách lớn hơn 100m
-      if (_currentDistance! > 100) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Bạn còn cách điểm giao ${_currentDistance!.toStringAsFixed(0)}m. Hãy đến gần hơn (<100m) để xác nhận!"), 
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 3),
-          ),
-        );
-        return;
-      }
-    }
-
-    _executeStatusChange();
   }
 
   @override
@@ -242,6 +268,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
             onMapCreated: (c) => _controller.complete(c),
           ),
           
+          // Panel điều khiển bên dưới
           Positioned(
             bottom: 0, left: 0, right: 0,
             child: Container(
@@ -255,6 +282,7 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // Dòng trạng thái
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -266,7 +294,22 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text("Giao Đến: ${widget.order.deliveryAddress}", maxLines: 2, overflow: TextOverflow.ellipsis),
+                  
+                  // Địa chỉ giao hàng
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.red, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          "Giao Đến: ${widget.order.deliveryAddress}", 
+                          maxLines: 2, 
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontWeight: FontWeight.w500)
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 20),
                   
                   if (showButton)
@@ -276,10 +319,11 @@ class _DriverTrackingScreenState extends State<DriverTrackingScreen> {
                         backgroundColor: config!.color,
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         disabledBackgroundColor: Colors.grey,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
                       child: _isApiCalling 
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                        : Text(config.label, style: const TextStyle(color: Colors.white, fontSize: 16)),
+                        : Text(config.label, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     )
                 ],
               ),
